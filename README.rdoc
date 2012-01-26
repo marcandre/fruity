@@ -1,6 +1,107 @@
-= fruity
+= Fruity
 
-Description goes here.
+Make sure you're not comparing apples and oranges!
+
+Fruity makes it easy to *accurately* and *quickly* compare the performance of different Ruby algorithms.
+
+No need to decide how many times to run your stuff or to try to gauge how significant a speed difference can be, Fruity does it for you.
+
+= Install
+
+    gem install fruity
+
+= Usage
+
+  require 'fruity'
+  compare do
+    slow      { sleep(0.06) }
+    also_slow { sleep(0.03); sleep(0.03) }
+    quick     { sleep(0.03) }
+    quicker   { sleep(0.01) }
+  end
+
+Prints:
+
+  quicker is faster than quick by 3.0x ± 0.01
+  quick is faster than slow by 1.99x ± 0.01
+  slow is similar to also_slow
+
+= Alternate APIs
+
+There are many ways to specify what to compare.
+
+== Methods
+
+  class Foo
+    def slow
+      delay(0.2)
+    end
+    def faster
+      delay(0.1)
+    end
+  end
+  
+  compare :slow, :faster, :on => Foo.new
+
+  # Also, no need to specify the :on option for global methods:
+  def foo
+    # ...
+  end
+  def bar
+    # ...
+  end
+
+  compare :foo, :bar
+
+== Hash
+
+You can pass a hash with executable values; the keys will be used for to name the results.
+
+  compare(
+    foo: ->{ 2 *  2 },
+    bar: ->{ 2 ** 2 },
+  )
+
+  == List of callables
+
+  You can pass a list of callable objects:
+
+    compare(
+      ->{ "foo".upcase },
+      Proc.new{ "foo".upcase },
+      "foo".method(:upcase),
+    )
+
+  These will be named "Code 1", "Code 2" & "Code 3" respectively.
+
+== Block with parameter
+
+If you prefer, you can pass a block that accepts a parameter:
+
+  compare do |cp|
+    cp.foo { ... }
+    cp.bar { ... }
+  end
+
+== Approach
+
+Benchmarking is not trivial. A well-behaved comparison tool should:
+1) report there is no significant difference for identical blocks
+2) but report a very small difference if it is systematic (e.g between ->{ sleep(1.0) } and ->{ sleep(1.001) } )
+3) report the right performance factor, e.g. a ~2x speed difference for a block that does exactly twice what another is doing, like ->{ 2+2; 2+2 } vs ->{ 2+2 })
+
+I know of no other benchmarking tool that passes these tests.
+
+For example, the most scientifically minded tool I found (better-benchmark) fails 1 & 3; if reports a statistically significant difference of 0.5% for two identical blocks, while reporting a 4% difference for a block doing twice what the previous block is doing.
+
+In addition, all benchmarking tools require the user to either write their own inner loop (e.g. `1000.times{...}` ) or provide a number of inner iterations. Both can be better done automatically by a computer to minimize the time taken to do the test and provide acceptable reliability.
+
+== Algorithm
+
+We first determine the number of inner iterations needed to get a meaningful clock measurement (see sufficient_magnitude).
+When timing an execution, we always compare to a baseline (the time taken by an empty loop of the same magnitude).
+We call the different executables in succession, to minimize the impact on the order of execution.
+We calculate the error by taking into account the standard deviation of the time samples.
 
 == Contributing to fruity
  
