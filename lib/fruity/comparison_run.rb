@@ -4,11 +4,20 @@ module Fruity
   class ComparisonRun < Struct.new(:group, :timings)
     attr_reader :stats
 
-    # timings must be an array of size `group.size` of arrays of delays
+    # +timings+ must be an array of size `group.size` of arrays of delays
+    # or of arrays of [delay, baseline]
+    #
     def initialize(group, timings)
       raise ArgumentError, "Expected timings to be an array with #{group.size} elements (was #{timings.size})" unless timings.size == group.size
       super
-      @stats = timings.map{|t| Util.stats(t)}.freeze
+      @stats = timings.map do |series|
+        time, baseline = series.first
+        if baseline
+          Util.difference(*series.transpose)
+        else
+          Util.stats(series)
+        end
+      end.freeze
     end
 
     def to_s
