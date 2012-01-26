@@ -102,6 +102,20 @@ module Fruity
       }
     end
 
+    # Calculates the stats of the difference of +values+ and +baseline+
+    # (which can be stats or timings)
+    #
+    def difference(values, baseline)
+      values, baseline = [values, baseline].map{|x| x.is_a?(Hash) ? x : stats(x)}
+      {
+        :min            => values[:min]  - baseline[:max],
+        :max            => values[:max]  - baseline[:min],
+        :mean           => values[:mean] - baseline[:mean],
+        :sample_std_dev => Math.sqrt(values[:sample_std_dev] ** 2 + values[:sample_std_dev] ** 2),
+        # See http://stats.stackexchange.com/questions/6096/correct-way-to-calibrate-means
+      }
+    end
+
     # Given two stats +cur+ and +vs+, returns a hash with
     # the ratio between the two, the precision, etc.
     #

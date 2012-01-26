@@ -38,5 +38,32 @@ module Fruity
         }
       end
     end
+
+    describe :difference do
+      it "returns stats for the difference of two series" do
+        s = Util.stats([0, 4])
+        Util.difference(s, s).should == {
+          :min => -4,
+          :max => 4,
+          :mean => 0,
+          :sample_std_dev => 4,
+        }
+      end
+
+      it "gives similar results when comparing an exec and its baseline from stats on proper_time" do
+        exec = ->{ 2 ** 3 ** 4 }
+        options = {:magnitude => Util.sufficient_magnitude(exec) }
+        n = 100
+        timings  = [exec, ->{}].map do |e|
+          n.times.map { Util.real_time(e, options) }
+        end
+        proper = Util.stats(timings.transpose.map{|e, b| e - b})
+        diff = Util.difference(*timings)
+        diff[:mean].should   be_within(Float::EPSILON).of(proper[:mean])
+        diff[:max].should    be_between(proper[:max], proper[:max]*2)
+        diff[:min].should    <= proper[:min]
+        diff[:sample_std_dev].should be_between(proper[:sample_std_dev], 2 * proper[:sample_std_dev])
+      end
+    end
   end
 end
