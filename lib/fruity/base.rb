@@ -10,6 +10,7 @@ module Fruity
   DEFAULT_OPTIONS = {
     :on         => GLOBAL_SCOPE,
     :samples    => 20,
+    :disable_gc => false,
   }
 
   OTHER_OPTIONS = [

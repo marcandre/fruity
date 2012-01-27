@@ -64,6 +64,8 @@ module Fruity
     # number of times given by +options[:magnitude]+
     #
     def real_time(exec, options = {})
+      GC.start
+      GC.disable if options[:disable_gc]
       n = options.fetch(:magnitude)
       if options.has_key?(:self)
         new_self = options[:self]
@@ -79,6 +81,8 @@ module Fruity
           Benchmark.realtime{ n.times{ exec.call } }
         end
       end
+    ensure
+      GC.enable
     end
 
     # Returns the inherent precision of +proper_time+
