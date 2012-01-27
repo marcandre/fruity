@@ -120,17 +120,17 @@ module Fruity
     # the ratio between the two, the precision, etc.
     #
     def compare_stats(cur, vs)
-      err = (vs[:sample_std_dev] + Util.proper_time_precision +
-             (cur[:sample_std_dev] + Util.proper_time_precision) * vs[:mean] / cur[:mean]
+      err = (vs[:sample_std_dev] +
+             cur[:sample_std_dev] * vs[:mean] / cur[:mean]
             ) / cur[:mean]
 
-      rounding = -Math.log(err, 10)
+      rounding = err > 0 ? -Math.log(err, 10) : 666
       mean = vs[:mean] / cur[:mean]
       {
         :mean     => mean,
         :factor   => (mean).round(rounding),
-        :max      => (vs[:mean] + vs[:sample_std_dev] + Util.proper_time_precision) / (cur[:mean] - cur[:sample_std_dev] - Util.proper_time_precision),
-        :min      => (vs[:mean] - vs[:sample_std_dev] - Util.proper_time_precision) / (cur[:mean] + cur[:sample_std_dev] + Util.proper_time_precision),
+        :max      => (vs[:mean] + vs[:sample_std_dev]) / (cur[:mean] - cur[:sample_std_dev]),
+        :min      => (vs[:mean] - vs[:sample_std_dev]) / (cur[:mean] + cur[:sample_std_dev]),
         :rounding => rounding,
         :precision => 10.0 **(-rounding.round),
       }
