@@ -65,5 +65,11 @@ module Fruity
         diff[:sample_std_dev].should be_between(proper[:sample_std_dev], 2 * proper[:sample_std_dev])
       end
     end
+
+    describe :filter do
+      it "returns the filtered series" do
+        Util.filter([4, 5, 2, 3, 1], 0.21, 0.39).should == [2, 3, 4]
+      end
+    end
   end
 end

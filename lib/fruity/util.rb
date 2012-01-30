@@ -139,5 +139,12 @@ module Fruity
         :precision => 10.0 **(-rounding.round),
       }
     end
+
+    def filter(series, remove_min_ratio, remove_max_ratio = remove_min_ratio)
+      series.sort![
+        (remove_min_ratio * series.size).floor ...
+        ((1-remove_max_ratio) * series.size).ceil
+      ]
+    end
   end
 end

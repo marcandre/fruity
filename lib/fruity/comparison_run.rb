@@ -13,7 +13,7 @@ module Fruity
       @stats = timings.map do |series|
         time, baseline = series.first
         if baseline
-          Util.difference(*series.transpose)
+          Util.difference(*series.transpose.map{|s| Util.filter(s, *group.options.fetch(:filter))})
         else
           Util.stats(series)
         end
