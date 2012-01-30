@@ -95,13 +95,19 @@ module Fruity
     #
     def stats(values)
       sum = values.inject(0, :+)
-      sum_square = values.inject(0){|sum, e| sum + e * e}
-      sample_std_dev = Math.sqrt( (sum_square - sum * sum / values.size) / (values.size-1) )
+      # See http://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
+      q = mean = 0
+      values.each_with_index do |x, k|
+        prev_mean = mean
+        mean += (x - prev_mean) / (k + 1)
+        q += (x - mean) * (x - prev_mean)
+      end
+      sample_std_dev = Math.sqrt( q / (values.size-1) )
       min, max = values.minmax
       {
         :min => min,
         :max => max,
-        :mean => sum / values.size,
+        :mean => mean,
         :sample_std_dev => sample_std_dev
       }
     end
