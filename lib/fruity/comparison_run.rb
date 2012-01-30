@@ -44,6 +44,26 @@ module Fruity
       end.join("\n")
     end
 
+    def export(fn = (require "tmpdir"; "#{Dir.tmpdir}/export.csv"))
+      require "csv"
+      CSV.open(fn, "wb") do |csv|
+        head = group.elements.keys
+        case baseline_type
+        when :split
+          head = head.flat_map{|h| [h, "#{head} bl"]}
+          data = timings.zip(baselines).flatten(1).transpose
+        when :single
+          data = (timings + [baselines]).transpose
+          head << "baseline"
+        else
+          data = timings.transpose
+        end
+        csv << head
+        data.each{|vals| csv << vals}
+      end
+      fn
+    end
+
     def size
       timings.first.size
     end

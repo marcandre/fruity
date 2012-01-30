@@ -31,5 +31,13 @@ module Fruity
   def compare(*stuff, &block)
     puts report(*stuff, &block)
   end
+
+  def study(*stuff, &block)
+    run = Fruity::Runner.new(Fruity::Group.new(*stuff, &block)).run(:baseline => :single)
+    path = run.export
+    `open "#{path}"`
+    run
+  end
+
   extend self
 end
