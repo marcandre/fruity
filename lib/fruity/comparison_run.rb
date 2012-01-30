@@ -1,20 +1,27 @@
 # encoding: utf-8
 
 module Fruity
-  class ComparisonRun < Struct.new(:group, :timings)
+  class ComparisonRun < Struct.new(:group, :timings, :baselines)
     attr_reader :stats
 
     # +timings+ must be an array of size `group.size` of arrays of delays
     # or of arrays of [delay, baseline]
     #
-    def initialize(group, timings)
+    def initialize(group, timings, baselines)
       raise ArgumentError, "Expected timings to be an array with #{group.size} elements (was #{timings.size})" unless timings.size == group.size
       super
-      @stats = timings.map do |series|
-        time, baseline = series.first
-        if baseline
-          Util.difference(*series.transpose.map{|s| Util.filter(s, *group.options.fetch(:filter))})
-        else
+
+      filter = group.options.fetch(:filter)
+
+      baseline = Util.filter(baselines, *filter) if baseline_type == :single
+
+      @stats = timings.map.with_index do |series, i|
+        case baseline_type
+        when :split
+          Util.difference(Util.filter(series, *filter), Util.filter(baselines.fetch(i), *filter))
+        when :single
+          Util.difference(Util.filter(series, *filter), baseline)
+        when :none
           Util.stats(series)
         end
       end.freeze
@@ -60,6 +67,16 @@ module Fruity
         "#{ratio}x ± #{prec}"
       else
         "#{(ratio - 1)*100}% ± #{prec*100}%"
+      end
+    end
+
+    def baseline_type
+      if baselines.nil?
+        :none
+      elsif baselines.first.is_a?(Array)
+        :split
+      else
+        :single
       end
     end
   end

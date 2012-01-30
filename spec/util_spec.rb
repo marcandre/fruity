@@ -23,12 +23,6 @@ module Fruity
     end
 
     describe :stats do
-      it "raises an error on an empty list of values" do
-        ->{
-          Util.stats([])
-        }.should raise_error
-      end
-
       it "returns cools stats on the given values" do
         Util.stats([0, 4]).should == {
           :min => 0,

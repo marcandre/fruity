@@ -12,6 +12,7 @@ module Fruity
     :samples    => 20,
     :disable_gc => false,
     :filter     => [0, 0.2],
+    :baseline   => :split,
   }
 
   OTHER_OPTIONS = [
