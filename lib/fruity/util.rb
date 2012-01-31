@@ -85,6 +85,17 @@ module Fruity
       GC.enable
     end
 
+    # Returns the result of calling +exec+
+    #
+    def result_of(exec, options = {})
+      args = (options[:args] || [])
+      if options.has_key?(:self)
+        options[:self].instance_exec(*args, &exec)
+      else
+        exec.call(*args)
+      end
+    end
+
     # Returns the inherent precision of +proper_time+
     #
     def proper_time_precision

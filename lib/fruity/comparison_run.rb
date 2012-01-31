@@ -29,17 +29,19 @@ module Fruity
 
     def to_s
       order = (0...group.size).sort_by{|i| @stats[i][:mean] }
+      results = group.elements.map{|n, exec| Util.result_of(exec, group.options) }
       order.each_cons(2).map do |i, j|
         cmp = comparison(i, j)
         s = if cmp[:factor] == 1
-          "%{cur} is similar to %{vs}"
+          "%{cur} is similar to %{vs}%{different}"
         else
-          "%{cur} is faster than %{vs} by %{ratio}"
+          "%{cur} is faster than %{vs} by %{ratio}%{different}"
         end
         s % {
           :cur => group.elements.keys[i],
           :vs => group.elements.keys[j],
           :ratio => format_comparison(cmp),
+          :different => results[i] == results[j] ? "" : " (results differ: #{results[i]} vs #{results[j]})"
         }
       end.join("\n")
     end
