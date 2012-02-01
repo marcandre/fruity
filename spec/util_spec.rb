@@ -8,7 +8,7 @@ module Fruity
 
     describe :sufficient_magnitude do
       it "returns a big value for a quick (but not trivial)" do
-        Util.sufficient_magnitude(->{ 2 + 2 }).should > 10000
+        Util.sufficient_magnitude(->{ 2.nil? }).should > 10000
       end
 
       it "return 1 for a sufficiently slow block" do
@@ -17,7 +17,7 @@ module Fruity
 
       it "should raise an error for a trivial block" do
         ->{
-          Util.sufficient_magnitude(->{})
+          Util.sufficient_magnitude(Proc.new{})
         }.should raise_error
       end
     end

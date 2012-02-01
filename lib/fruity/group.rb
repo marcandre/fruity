@@ -48,6 +48,10 @@ module Fruity
       elements.size
     end
 
+    def run(options = {})
+      Runner.new(self).run(options)
+    end
+
   private
     def compare_hash(h)
       elements.merge!(h)

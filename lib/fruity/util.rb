@@ -26,25 +26,51 @@ module Fruity
       end.min
     end
 
+    APPROX_POWER = 5
     # Calculates the number +n+ that needs to be passed
-    # to +proper_time+ to get a result that is precise
-    # to within +PROPER_TIME_RELATIVE_ERROR+
+    # to +real_time+ to get a result that is precise
+    # to within +PROPER_TIME_RELATIVE_ERROR+ when compared
+    # to the baseline.
     #
     # For example, ->{ sleep(1) } needs only to be run once to get
     # a measurement that will not be affected by the inherent imprecision
-    # of the time measurement, but ->{ 2 + 2 } needs to be called
+    # of the time measurement (or of the inner loop), but ->{ 2 + 2 } needs to be called
     # a huge number of times so that the returned time measurement is not
-    # due in big part to the imprecision of the measurement itself.
+    # due in big part to the imprecision of the measurement itself
+    # or the inner loop itself.
     #
     def sufficient_magnitude(exec, options = {})
-      min_desired_result = clock_precision * MEASUREMENTS_BY_PROPER_TIME / PROPER_TIME_RELATIVE_ERROR
-      max_iter = 1 << 20
-      n = 1
-      while (p = proper_time(exec, {:magnitude => n}.merge(options))) < min_desired_result
-        raise "Given executable can not be reasonably distinguished from an empty block" if n >= max_iter
-        n = [n * [min_desired_result.div(p + clock_precision), 2].max, max_iter].min
+      mag, delay = sufficient_magnitude_and_delay(exec, options)
+      mag
+    end
+
+    BASELINE_THRESHOLD = 1.02 # Ratio between two identical baselines is typically < 1.02, while {2+2} compared to baseline is typically > 1.02
+
+    def sufficient_magnitude_and_delay(exec, options = {})
+      power = 0
+      min_desired_delta = clock_precision * MEASUREMENTS_BY_PROPER_TIME / PROPER_TIME_RELATIVE_ERROR
+      # First, make a gross approximation with a single sample and no baseline
+      min_approx_delay = min_desired_delta / (1 << APPROX_POWER)
+      while (delay = real_time(exec, options.merge(:magnitude => 1 << power))) < min_approx_delay
+        power += [Math.log(min_approx_delay.div(delay + clock_precision), 2), 1].max.floor
       end
-      n
+
+      # Then take a couple of samples, along with a baseline
+      power += 1 unless delay > 2 * min_approx_delay
+      group = Group.new(exec, NOOP, options.merge(:baseline => :none, :samples => 5, :filter => [0, 0.25], :magnitude => 1 << power))
+      stats = group.run.stats
+      if stats[0][:mean] / stats[1][:mean] < 2
+        # Quite close to baseline, which means we need to be more discriminant
+        power += APPROX_POWER
+        stats = group.run(:samples => 40, :magnitude => 1 << power).stats
+        raise "Given callable can not be reasonably distinguished from an empty block" if stats[0][:mean] / stats[1][:mean] < BASELINE_THRESHOLD
+      end
+      delta = stats[0][:mean] - stats[1][:mean]
+      addl_power = [Math.log(min_desired_delta.div(delta), 2), 0].max.floor
+      [
+        1 << (power + addl_power),
+        stats[0][:mean] * (1 << addl_power),
+      ]
     end
 
     # The proper time is the real time taken by calling +exec+
