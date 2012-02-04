@@ -1,3 +1,4 @@
+require_relative "baseline"
 require_relative "util"
 require_relative "runner"
 require_relative "comparison_run"

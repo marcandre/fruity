@@ -9,7 +9,7 @@ module Fruity
         when :split
           baselines << (bl = [])
         when :single
-          baselines << Util.real_time(Util::NOOP, options)
+          baselines << Util.real_time(Baseline[group.elements.first.value], options)
         when :none
         else
           raise ArgumentError, "Unrecognized :baseline option: #{options.fetch(:baseline)}"
@@ -52,7 +52,7 @@ module Fruity
       @timings = options.fetch(:samples).times.map do
         baselines << Util.real_time(baseline, options)
         group.elements.map do |name, exec|
-          bl << Util.real_time(Util::NOOP, options) if bl
+          bl << Util.real_time(Baseline[exec], options) if bl
           Util.real_time(exec, options)
         end
       end.transpose

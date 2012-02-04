@@ -11,8 +11,6 @@ module Fruity
     MEASUREMENTS_BY_REALTIME = 2
     MEASUREMENTS_BY_PROPER_TIME = 2 * MEASUREMENTS_BY_REALTIME
 
-    NOOP = Proc.new{}
-
     # Measures the smallest obtainable delta of two time measurements
     #
     def clock_precision
@@ -25,6 +23,7 @@ module Fruity
         delta
       end.min
     end
+
 
     APPROX_POWER = 5
     # Calculates the number +n+ that needs to be passed
@@ -57,7 +56,7 @@ module Fruity
 
       # Then take a couple of samples, along with a baseline
       power += 1 unless delay > 2 * min_approx_delay
-      group = Group.new(exec, NOOP, options.merge(:baseline => :none, :samples => 5, :filter => [0, 0.25], :magnitude => 1 << power))
+      group = Group.new(exec, Baseline[exec], options.merge(:baseline => :none, :samples => 5, :filter => [0, 0.25], :magnitude => 1 << power))
       stats = group.run.stats
       if stats[0][:mean] / stats[1][:mean] < 2
         # Quite close to baseline, which means we need to be more discriminant
@@ -83,7 +82,7 @@ module Fruity
       unless options.has_key?(:magnitude)
         options = {:magnitude => sufficient_magnitude(exec, options)}.merge(options)
       end
-      real_time(exec, options) - real_time(NOOP, options)
+      real_time(exec, options) - real_time(Baseline[exec], options)
     end
 
     # Returns the real time taken by calling +exec+
