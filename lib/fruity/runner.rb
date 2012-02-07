@@ -1,18 +1,19 @@
 module Fruity
   class Runner < Struct.new(:group)
+    attr_reader :options, :delay, :timings, :baselines
+
     def run(options = {})
-      options = group.options.merge(options)
-      options[:magnitude] ||= group.sufficient_magnitude
-      baselines = []
-      timings = options.fetch(:samples).times.map do
-        case options.fetch(:baseline)
-        when :split
-          baselines << (bl = [])
-        when :single
-          baselines << Util.real_time(Baseline[group.elements.first.value], options)
-        when :none
-        else
-          raise ArgumentError, "Unrecognized :baseline option: #{options.fetch(:baseline)}"
+      prepare(options)
+      yield self if block_given?
+      sample
+    end
+
+    def feedback
+      mess = "Running each test " << (options[:magnitude] == 1 ? "once." : "#{options[:magnitude]} times.")
+      if d = delay
+        if d > 60
+          d = (d / 60).round
+          unit = "minute"
         end
         mess << " Test will take about #{d.ceil} #{unit || 'second'}#{d > 1 ? 's' : ''}."
       end
@@ -52,19 +53,18 @@ module Fruity
       @timings = options.fetch(:samples).times.map do
         baselines << Util.real_time(baseline, options)
         group.elements.map do |name, exec|
-          bl << Util.real_time(Baseline[exec], options) if bl
           Util.real_time(exec, options)
         end
       end.transpose
+    end
 
-      case options.fetch(:baseline)
-      when :split
-        baselines = baselines.transpose
-      when :none
-        baselines = nil
-      end
-
-      ComparisonRun.new(group, timings, baselines)
+    def sample_baseline_none
+      @baselines = nil
+      @timings = options.fetch(:samples).times.map do
+        group.elements.map do |name, exec|
+          Util.real_time(exec, options)
+        end
+      end.transpose
     end
   end
 end

@@ -26,7 +26,7 @@ module Fruity
   OPTIONS = DEFAULT_OPTIONS.keys + OTHER_OPTIONS
 
   def report(*stuff, &block)
-    Fruity::Runner.new(Fruity::Group.new(*stuff, &block)).run
+    Fruity::Runner.new(Fruity::Group.new(*stuff, &block)).run(&:feedback)
   end
 
   def compare(*stuff, &block)
@@ -34,7 +34,7 @@ module Fruity
   end
 
   def study(*stuff, &block)
-    run = Fruity::Runner.new(Fruity::Group.new(*stuff, &block)).run(:baseline => :single)
+    run = Fruity::Runner.new(Fruity::Group.new(*stuff, &block)).run(:baseline => :single, &:feedback)
     path = run.export
     `open "#{path}"`
     run

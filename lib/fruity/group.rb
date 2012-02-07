@@ -44,6 +44,17 @@ module Fruity
       elements.map{|name, exec| Util.sufficient_magnitude(exec, options) }.max
     end
 
+    # Returns the maximal sufficient_magnitude for all elements
+    # and the approximate delay taken for the whole group
+    # See Util.sufficient_magnitude
+    #
+    def sufficient_magnitude_and_delay
+      mags_and_delays = elements.map{|name, exec| Util.sufficient_magnitude_and_delay(exec, options) }
+      mag = mags_and_delays.map(&:first).max
+      delay = mags_and_delays.map{|m, d| d * mag / m}.inject(:+)
+      [mag, delay]
+    end
+
     def size
       elements.size
     end
