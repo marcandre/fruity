@@ -12,8 +12,8 @@ module Fruity
     :on         => GLOBAL_SCOPE,
     :samples    => 20,
     :disable_gc => false,
-    :filter     => [0, 0.2],
-    :baseline   => :split,
+    :filter     => [0, 0.2],        # Proportion of samples to discard [lower_end, upper_end]
+    :baseline   => :single,         # Either :none, :single or :split
   }
 
   OTHER_OPTIONS = [
