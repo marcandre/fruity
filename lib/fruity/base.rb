@@ -17,7 +17,7 @@ module Fruity
   }
 
   OTHER_OPTIONS = [
-    :magnitude,
+    :magnify,
     :args,
     :self,
     :verbose,

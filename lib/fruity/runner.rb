@@ -9,7 +9,7 @@ module Fruity
     end
 
     def feedback
-      mess = "Running each test " << (options[:magnitude] == 1 ? "once." : "#{options[:magnitude]} times.")
+      mess = "Running each test " << (options[:magnify] == 1 ? "once." : "#{options[:magnify]} times.")
       if d = delay
         if d > 60
           d = (d / 60).round
@@ -23,8 +23,8 @@ module Fruity
   private
     def prepare(opt)
       @options = group.options.merge(opt)
-      unless options[:magnitude]
-        options[:magnitude], @delay = group.sufficient_magnitude_and_delay
+      unless options[:magnify]
+        options[:magnify], @delay = group.sufficient_magnification_and_delay
         @delay *= options.fetch(:samples)
       end
     end

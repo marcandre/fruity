@@ -98,8 +98,8 @@ In addition, all benchmarking tools require the user to either write their own i
 
 == Algorithm
 
-We first determine the number of inner iterations needed to get a meaningful clock measurement (see sufficient_magnitude).
-When timing an execution, we always compare to a baseline (the time taken by an empty loop of the same magnitude).
+We first determine the number of inner iterations needed to get a meaningful clock measurement (see sufficient_magnification).
+When timing an execution, we always compare to a baseline (the time taken by an empty loop of the same magnification).
 We call the different executables in succession, to minimize the impact on the order of execution.
 We calculate the error by taking into account the standard deviation of the time samples.
 

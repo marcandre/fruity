@@ -37,19 +37,19 @@ module Fruity
       compare_block(block) if block
     end
 
-    # Returns the maximal sufficient_magnitude for all elements
-    # See Util.sufficient_magnitude
+    # Returns the maximal sufficient_magnification for all elements
+    # See Util.sufficient_magnification
     #
-    def sufficient_magnitude
-      elements.map{|name, exec| Util.sufficient_magnitude(exec, options) }.max
+    def sufficient_magnification
+      elements.map{|name, exec| Util.sufficient_magnification(exec, options) }.max
     end
 
-    # Returns the maximal sufficient_magnitude for all elements
+    # Returns the maximal sufficient_magnification for all elements
     # and the approximate delay taken for the whole group
-    # See Util.sufficient_magnitude
+    # See Util.sufficient_magnification
     #
-    def sufficient_magnitude_and_delay
-      mags_and_delays = elements.map{|name, exec| Util.sufficient_magnitude_and_delay(exec, options) }
+    def sufficient_magnification_and_delay
+      mags_and_delays = elements.map{|name, exec| Util.sufficient_magnification_and_delay(exec, options) }
       mag = mags_and_delays.map(&:first).max
       delay = mags_and_delays.map{|m, d| d * mag / m}.inject(:+)
       [mag, delay]

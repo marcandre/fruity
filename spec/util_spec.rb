@@ -6,18 +6,18 @@ module Fruity
 
     its(:proper_time_precision) { should == 4.0e-06 }
 
-    describe :sufficient_magnitude do
+    describe :sufficient_magnification do
       it "returns a big value for a quick (but not trivial)" do
-        Util.sufficient_magnitude(->{ 2.nil? }).should > 10000
+        Util.sufficient_magnification(->{ 2 + 2 }).should > 10000
       end
 
       it "return 1 for a sufficiently slow block" do
-        Util.sufficient_magnitude(->{sleep(0.01)}).should == 1
+        Util.sufficient_magnification(->{sleep(0.01)}).should == 1
       end
 
       it "should raise an error for a trivial block" do
         ->{
-          Util.sufficient_magnitude(Proc.new{})
+          Util.sufficient_magnification(->{})
         }.should raise_error
       end
     end
@@ -46,7 +46,7 @@ module Fruity
 
       it "gives similar results when comparing an exec and its baseline from stats on proper_time" do
         exec = ->{ 2 ** 3 ** 4 }
-        options = {:magnitude => Util.sufficient_magnitude(exec) }
+        options = {:magnify => Util.sufficient_magnification(exec) }
         n = 100
         timings  = [exec, ->{}].map do |e|
           n.times.map { Util.real_time(e, options) }

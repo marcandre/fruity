@@ -38,30 +38,30 @@ module Fruity
     # due in big part to the imprecision of the measurement itself
     # or the inner loop itself.
     #
-    def sufficient_magnitude(exec, options = {})
-      mag, delay = sufficient_magnitude_and_delay(exec, options)
+    def sufficient_magnification(exec, options = {})
+      mag, delay = sufficient_magnification_and_delay(exec, options)
       mag
     end
 
     BASELINE_THRESHOLD = 1.02 # Ratio between two identical baselines is typically < 1.02, while {2+2} compared to baseline is typically > 1.02
 
-    def sufficient_magnitude_and_delay(exec, options = {})
+    def sufficient_magnification_and_delay(exec, options = {})
       power = 0
       min_desired_delta = clock_precision * MEASUREMENTS_BY_PROPER_TIME / PROPER_TIME_RELATIVE_ERROR
       # First, make a gross approximation with a single sample and no baseline
       min_approx_delay = min_desired_delta / (1 << APPROX_POWER)
-      while (delay = real_time(exec, options.merge(:magnitude => 1 << power))) < min_approx_delay
+      while (delay = real_time(exec, options.merge(:magnify => 1 << power))) < min_approx_delay
         power += [Math.log(min_approx_delay.div(delay + clock_precision), 2), 1].max.floor
       end
 
       # Then take a couple of samples, along with a baseline
       power += 1 unless delay > 2 * min_approx_delay
-      group = Group.new(exec, Baseline[exec], options.merge(:baseline => :none, :samples => 5, :filter => [0, 0.25], :magnitude => 1 << power))
+      group = Group.new(exec, Baseline[exec], options.merge(:baseline => :none, :samples => 5, :filter => [0, 0.25], :magnify => 1 << power))
       stats = group.run.stats
       if stats[0][:mean] / stats[1][:mean] < 2
         # Quite close to baseline, which means we need to be more discriminant
         power += APPROX_POWER
-        stats = group.run(:samples => 40, :magnitude => 1 << power).stats
+        stats = group.run(:samples => 40, :magnify => 1 << power).stats
         raise "Given callable can not be reasonably distinguished from an empty block" if stats[0][:mean] / stats[1][:mean] < BASELINE_THRESHOLD
       end
       delta = stats[0][:mean] - stats[1][:mean]
@@ -73,25 +73,25 @@ module Fruity
     end
 
     # The proper time is the real time taken by calling +exec+
-    # number of times given by +options[:magnitude]+ minus
+    # number of times given by +options[:magnify]+ minus
     # the real time for calling an empty executable instead.
     #
-    # If +options[:magnitude]+ is not given, it will be calculated to be meaningful.
+    # If +options[:magnify]+ is not given, it will be calculated to be meaningful.
     #
     def proper_time(exec, options = {})
-      unless options.has_key?(:magnitude)
-        options = {:magnitude => sufficient_magnitude(exec, options)}.merge(options)
+      unless options.has_key?(:magnify)
+        options = {:magnify => sufficient_magnification(exec, options)}.merge(options)
       end
       real_time(exec, options) - real_time(Baseline[exec], options)
     end
 
     # Returns the real time taken by calling +exec+
-    # number of times given by +options[:magnitude]+
+    # number of times given by +options[:magnify]+
     #
     def real_time(exec, options = {})
       GC.start
       GC.disable if options[:disable_gc]
-      n = options.fetch(:magnitude)
+      n = options.fetch(:magnify)
       if options.has_key?(:self)
         new_self = options[:self]
         if args = options[:args] and args.size > 0
