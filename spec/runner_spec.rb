@@ -6,7 +6,7 @@ module Fruity
     let(:runner){ Runner.new(group) }
 
     it "runs from a Group" do
-      run = runner.run(:samples => 42, :magnify => 100)
+      run = runner.run(:samples => 42, :magnify => 100, :baseline => :split)
       run.timings.should be_array_of_size(2, 42)
       run.baselines.should be_array_of_size(2, 42)
     end
