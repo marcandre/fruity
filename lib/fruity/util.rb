@@ -56,13 +56,21 @@ module Fruity
 
       # Then take a couple of samples, along with a baseline
       power += 1 unless delay > 2 * min_approx_delay
-      group = Group.new(exec, Baseline[exec], options.merge(:baseline => :none, :samples => 5, :filter => [0, 0.25], :magnify => 1 << power))
+      group = Group.new(exec, Baseline[exec],
+                        options.merge(
+                          :baseline => :none,
+                          :samples => 5,
+                          :filter => [0, 0.25],
+                          :magnify => 1 << power
+                        ))
       stats = group.run.stats
       if stats[0][:mean] / stats[1][:mean] < 2
         # Quite close to baseline, which means we need to be more discriminant
         power += APPROX_POWER
         stats = group.run(:samples => 40, :magnify => 1 << power).stats
-        raise "Given callable can not be reasonably distinguished from an empty block" if stats[0][:mean] / stats[1][:mean] < BASELINE_THRESHOLD
+        if stats[0][:mean] / stats[1][:mean] < BASELINE_THRESHOLD
+          raise "Given callable can not be reasonably distinguished from an empty block"
+        end
       end
       delta = stats[0][:mean] - stats[1][:mean]
       addl_power = [Math.log(min_desired_delta.div(delta), 2), 0].max.floor
