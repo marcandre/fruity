@@ -62,7 +62,7 @@ You can pass a hash with executable values; the keys will be used for to name th
     bar: ->{ 2 ** 2 },
   )
 
-  == List of callables
+== List of callables
 
   You can pass a list of callable objects:
 
