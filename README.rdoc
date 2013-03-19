@@ -86,9 +86,10 @@ If you prefer, you can pass a block that accepts a parameter:
 == Approach
 
 Benchmarking is not trivial. A well-behaved comparison tool should:
-1) report there is no significant difference for identical blocks
-2) but report a very small difference if it is systematic (e.g between ->{ sleep(1.0) } and ->{ sleep(1.001) } )
-3) report the right performance factor, e.g. a ~2x speed difference for a block that does exactly twice what another is doing, like ->{ 2+2; 2+2 } vs ->{ 2+2 })
+
+1. Report there is no significant difference for identical blocks
+2. Report a very small difference if it is systematic (e.g between `->{ sleep(1.0) }` and `->{ sleep(1.001) }` )
+3. Report the right performance factor, e.g. a ~2x speed difference for a block that does exactly twice what another is doing, like `->{ 2+2; 2+2 }` vs `->{ 2+2 }`)
 
 I know of no other benchmarking tool that passes these tests.
 
